@@ -1,2 +1,2 @@
 $py = if (Test-Path .venv/bin/python) { '.venv/bin/python' } else { 'python' }
-& $py "src\osint-mapper_main.py"
+& $py "src\osint_mapper_main.py"
