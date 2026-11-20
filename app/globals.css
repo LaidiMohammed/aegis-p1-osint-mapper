@@ -1,0 +1,110 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f4f0e6;
+  --ink: #16233d;
+  --coral: #e0603a;
+  --sea: #2f6f7e;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "DM Sans", Arial, sans-serif;
+}
+
+/* --- Atlas grid: dotted map + faint contour rules --- */
+.atlas-bg {
+  position: relative;
+  background-image:
+    radial-gradient(rgba(22, 35, 61, 0.13) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.atlas-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(22,35,61,.05) 1px, transparent 1px) 0 0 / 100% 240px,
+    radial-gradient(700px 420px at 90% 0%, rgba(224,96,58,.09), transparent 65%);
+  pointer-events: none;
+}
+
+/* --- Paper grain --- */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* --- Crosshair --- */
+.crosshair {
+  position: relative;
+}
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--coral);
+  opacity: .65;
+}
+.crosshair::before { left: 50%; top: -8px; bottom: -8px; width: 1px; }
+.crosshair::after { top: 50%; left: -8px; right: -8px; height: 1px; }
+
+/* --- Field note card: thin ink rule, no boxy fill --- */
+.note {
+  position: relative;
+  border-top: 2px solid var(--ink);
+  padding-top: 1.25rem;
+}
+.note::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  right: 0;
+  width: 42px;
+  height: 2px;
+  background: var(--coral);
+}
+
+/* --- Coordinate label --- */
+.coord {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: .65rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+/* --- Reveal --- */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* --- Dashed route --- */
+.route { stroke-dasharray: 5 6; animation: dash 18s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -220; } }
+
+/* --- Pulse node --- */
+.pulse { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; }
+@keyframes pulse { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+
+/* --- Marquee --- */
+.marquee-track { display: flex; width: max-content; animation: marquee 26s linear infinite; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* --- Selection / scrollbar --- */
+::selection { background: var(--coral); color: #fff; }
+::-webkit-scrollbar { width: 9px; }
+::-webkit-scrollbar-track { background: var(--paper); }
+::-webkit-scrollbar-thumb { background: var(--sand); border: 2px solid var(--paper); }
+::-webkit-scrollbar-thumb:hover { background: var(--coral); }
