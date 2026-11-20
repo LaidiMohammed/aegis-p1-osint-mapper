@@ -12,9 +12,9 @@ const config: Config = {
         sand: "#d8d0bd",
       },
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        sans: ["DM Sans", "Arial", "sans-serif"],
-        mono: ["IBM Plex Mono", "Consolas", "monospace"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "Arial", "sans-serif"],
+        mono: ["var(--font-mono)", "Consolas", "monospace"],
       },
     },
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Phase = "idle" | "scanning" | "done";
 
@@ -17,13 +17,17 @@ export default function AtlasMap() {
 
   const cx = 300, cy = 190;
 
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => { timers.current.forEach((x) => clearTimeout(x)); timers.current = []; }, []);
+  const pushTimer = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)); };
+
   function run() {
     setPhase("scanning");
     setActive(0);
     SOURCES.forEach((_, i) => {
-      window.setTimeout(() => setActive(i + 1), 480 * (i + 1));
+      pushTimer(() => setActive(i + 1), 480 * (i + 1));
     });
-    window.setTimeout(() => setPhase("done"), 480 * SOURCES.length + 300);
+    pushTimer(() => setPhase("done"), 480 * SOURCES.length + 300);
   }
 
   return (
