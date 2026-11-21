@@ -1,17 +1,40 @@
-function hashStr(s: string): number { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h); }
-const CANDIDATES = ["config.php","config/config.php","wp-config.php","settings.py","secrets.yml",".env","config.yml","credentials.yml",".env.local"];
-export function runOsint(project: string) {
-  const seed = hashStr(project); let r = seed;
-  const rand = () => { r = (r * 1103515245 + 12345) % 2147483648; return r / 2147483648; };
-  const dns = Array.from({ length: 3 + (seed % 5) }, (_, i) => project + ".example" + (i + 1) + ".com");
-  const github = CANDIDATES.filter((_, i) => (seed + i) % 3 === 0).slice(0, 3).map(f => ({ file: f, repo: project, hits: ["config/" + f], source: "github", maturity: "public" }));
+/**
+ * P1 — Cartographie OSINT RÉELLE : DNS (node:dns) + GitHub/Dorks documentés.
+ * La résolution DNS est réelle ; GitHub/Dorks restent des simulations locales.
+ */
+import dns from "node:dns/promises";
+
+export interface DnsAnswer { type: string; value: string; }
+
+export async function dnsLookup(domain: string, recordType = "A"): Promise<DnsAnswer[]> {
+  try {
+    const rows = await (dns as any).resolve(domain, recordType);
+    if (recordType === "MX" && Array.isArray(rows)) {
+      return rows.map((r: any) => ({ type: "MX", value: r.exchange + " (prio " + r.priority + ")" }));
+    }
+    if (Array.isArray(rows)) return rows.map((v: any) => ({ type: recordType, value: String(v) }));
+    return [{ type: recordType, value: String(rows) }];
+  } catch {
+    return [];
+  }
+}
+
+const CANDIDATES = ["config.php", "wp-config.php", "settings.py", "secrets.yml", ".env", "config.yml", "credentials.yml", ".env.local"];
+
+export async function runOsint(project: string) {
+  const domain = project.includes(".") ? project : project + ".com";
+  const [a, mx, ns] = await Promise.all([dnsLookup(domain, "A"), dnsLookup(domain, "MX"), dnsLookup(domain, "NS")]);
+  const github = CANDIDATES.slice(0, 4).map((f) => ({ file: f, repo: project, hits: ["config/" + f], source: "github", maturity: "public" }));
   const dorks = [
-    "site:" + project + " filetype:pdf password",
-    "site:" + project + " intitle:'index of' confidential",
-  ].map(q => ({ query: q, url: "https://duckduckgo.com/html/?q=" + encodeURIComponent(q), source: "dork_sim" }));
+    { query: "site:" + domain + " filetype:pdf password", url: "https://duckduckgo.com/html/?q=" + encodeURIComponent("site:" + domain + " filetype:pdf password"), source: "dork_sim" },
+    { query: "site:" + domain + " intitle:'index of' confidential", url: "https://duckduckgo.com/html/?q=" + encodeURIComponent("site:" + domain + " intitle:'index of' confidential"), source: "dork_sim" },
+  ];
   return {
-    project: "P1", target: project, results: { dns_subdomains: dns, github_file_search: github, dorks },
-    summary: { dns_count: dns.length, github_count: github.length, dork_count: dorks.length },
-    method: "Analyse locale déterministe — pas d'appel API externe",
+    project: "P1",
+    target: project,
+    domain,
+    results: { dns_subdomains: a, dns_mx: mx, dns_ns: ns, github_file_search: github, dorks },
+    summary: { dns_count: a.length, github_count: github.length, dork_count: dorks.length },
+    method: "DNS RÉEL (node:dns) + GitHub/Dorks locaux — pas d'appel API externe",
   };
 }
