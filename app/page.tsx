@@ -1,4 +1,4 @@
-import AtlasMap from "@/components/AtlasMap";
+import Console from "@/components/Console";
 import CodeSectionP1 from "@/components/CodeSectionP1";
 import CopyCommandP1 from "@/components/CopyCommandP1";
 import Reveal from "@/components/Reveal";
@@ -84,7 +84,7 @@ export default function Page() {
             </div>
           </Reveal>
         </div>
-        <Reveal delay={120}><AtlasMap /></Reveal>
+        <Reveal delay={120}><Console /></Reveal>
       </section>
 
       {/* SOURCES */}
